@@ -239,9 +239,9 @@ scratchpads :: [NamedScratchpad]
 scratchpads =
   mkNS
     <$> [ TitleApp "emacs" (customFloating myRightCenter) "emacsclient -s emacs -c -a 'emacs --with-profile doom --title emacs --bg-daemon=emacs'"
-        , TitleApp "tmux" (customFloating myCenter) (myTerminal ++ " -t tmux -e tmux")
-        , TitleApp "btop" (customFloating myTopCenter) (myTerminal ++ " -t btop -e btop")
-        , TitleApp "btm" (customFloating myRight) (myTerminal ++ " -t btm -e btm")
+        , TitleApp "smi" (customFloating myTopLeft) (myTerminal ++ " -t smi -e bash -c 'watch -n0.1 nvidia-smi")
+        , TitleApp "btop" (customFloating myMidLeft) (myTerminal ++ " -t btop -e btop")
+        , TitleApp "tmux" (customFloating myBtmLeft) (myTerminal ++ " -t tmux -e tmux")
         ]
   where
     mkNS TitleApp {..} = NS name cmd (title =? name) hook
@@ -271,6 +271,17 @@ myTopCenter = W.RationalRect (1 / 32) (1 / 32) (30 / 32) (16 / 32)
 
 myRightCenter :: W.RationalRect
 myRightCenter = W.RationalRect (10 / 32) (1 / 32) (21 / 32) (30 / 32) -- px py wx wy
+
+
+myTopLeft :: W.RationalRect
+myTopLeft = W.RationalRect (1 / 32) (1 / 32) (9 / 32) (8 / 32) -- px py wx wy
+
+myMidLeft :: W.RationalRect
+myMidLeft = W.RationalRect (1 / 32) (9 / 32) (9 / 32) (10 / 32) -- px py wx wy
+
+myBtmLeft :: W.RationalRect
+myBtmLeft = W.RationalRect (1 / 32) (19 / 32) (9 / 32) (12 / 32) -- px py wx wy
+
 
 
 ------------------------------------------------------------------------
@@ -378,9 +389,9 @@ myKeyBindings =
   , ("M-C-<Return>", spawn myEditor)
   , ("M-S-C-<Return>", spawn myBrowser)
   , -- Scratchpads
-    ("M-C-a", namedScratchpadAction scratchpads "emacs")
+    ("M-C-a", namedScratchpadAction scratchpads "tmux")
   , ("M-C-s", namedScratchpadAction scratchpads "btop")
-  , ("M-C-d", namedScratchpadAction scratchpads "btm")
+  , ("M-C-d", namedScratchpadAction scratchpads "smi")
   , -- Dynamic Scratchpads
     ("M-S-a", withFocused $ toggleDynamicNSP "dyn1")
   , ("M-S-s", withFocused $ toggleDynamicNSP "dyn2")
