@@ -413,7 +413,7 @@ myKeyBindings =
   , ("<XF86MonBrightnessUp>", spawn "xbacklight -inc 5")
   , ("<XF86MonBrightnessDown>", spawn "xbacklight -dec 5")
   , ("<XF86Favorites>", spawn myScreenLocker)
-  , ("<F12>", spawn myScreenLocker)
+  -- , ("<F12>", spawn myScreenLocker)
   , ("M-M1-C-S-l", spawn myScreenLocker)
   , ("<XF86HomePage>", spawn myBrowser)
   , ("<XF86Search>", safeSpawn myBrowser ["https://hoogle.hackage.org"])
