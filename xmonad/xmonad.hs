@@ -145,7 +145,7 @@ myEditor2 :: String
 myEditor2 = "emacsclient -s snd -c -a 'emacs --with-profile doom --fg-daemon=snd'" -- Sets emacs as editor for tree select
 
 myCapture :: String
-myCapture = "DIR=~/Dropbox/captures; mkdir -p $DIR; flameshot gui -p $DIR"
+myCapture = "CAPTURE_DIR=${CAPTURE_DIR:-~/Captures}; mkdir -p \"$CAPTURE_DIR\"; flameshot gui -p \"$CAPTURE_DIR\""
 
 
 myEmail :: String
