@@ -10,12 +10,12 @@ Config { font            = "xft:Mononoki Nerd Font:weight=bold:pixelsize=11:anti
        , bgColor         = "#282c34"
        , fgColor         = "#ff6c6b"
        , position        = Top
-       , iconRoot        = "xpm"  -- default: "."
+       , iconRoot        = "."
 
        -- layout
        , sepChar =  "%"   -- delineator between plugin names and straight text
        , alignSep = "}{"  -- separator between left-right alignment
-       , template = " <action=`xdotool key control+alt+g`><icon=haskell_14.xpm/> </action> %UnsafeStdinReader% }{ %battery%  %coretemp%  %multicpu%  %memory%  %disku%  %dynnetwork%  %date%"
+       , template = " <action=`xdotool key control+alt+g`><fc=#ff79c6></fc> </action> %UnsafeStdinReader% }{ %battery%  %coretemp%  %multicpu%  %memory%  %disku%  %dynnetwork%  %date%"
 
        -- general behavior
        , lowerOnStart     = True    -- send to bottom of window stack on start
