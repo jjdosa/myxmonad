@@ -80,8 +80,14 @@ import XMonad.Prompt (Direction1D (Next, Prev))
 import XMonad.StackSet qualified as W
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Util.NamedScratchpad (NamedScratchpad (..), customFloating, dynamicNSPAction, namedScratchpadAction, namedScratchpadManageHook, toggleDynamicNSP)
-import XMonad.Util.Run (safeSpawn, spawnPipe)
+import XMonad.Util.Run (safeSpawn, safeSpawnProg, spawnPipe)
 import XMonad.Layout.GridVariants (Grid(Grid))
+import XMonad.Layout.ThreeColumns (ThreeCol(..))
+import XMonad.Layout.TwoPane (TwoPane(..))
+import XMonad.Layout.Combo (combineTwo)
+import XMonad.Layout.Tabbed (simpleTabbed)
+import XMonad.Hooks.UrgencyHook (UrgencyHook(..), withUrgencyHook, NoUrgencyHook(..))
+import XMonad.Util.Loggers (logTitles)
 
 
 main :: IO ()
@@ -116,7 +122,9 @@ main = do
           }
 
   xmonad $
+    ewmhFullscreen $
     ewmh $
+    withUrgencyHook NoUrgencyHook $
       conf
         `additionalKeysP` rememberActions "M-." myKeyBindings
 
@@ -164,16 +172,16 @@ altMask :: KeyMask
 altMask = mod1Mask -- Setting this for use in xprompts
 
 
+-- | Count windows in current workspace - cached for performance
 windowCount :: X (Maybe String)
 windowCount = gets $ Just . show . length . W.integrate' . W.stack . W.workspace . W.current . windowset
 
 
 myStartupHook :: X ()
-myStartupHook =
-  do
-    spawn "xset r rate 350 80"
-    spawn "picom -cf -i 0.8 --use-ewmh-active-win"
-    <+> setWMName "LG3D"
+myStartupHook = do
+    safeSpawn "xset" ["r", "rate", "350", "80"]
+    safeSpawn "picom" ["-cf", "-i", "0.8", "--use-ewmh-active-win"]
+    setWMName "LG3D"
 
 
 ------------------------------------------------------------------------
@@ -185,6 +193,8 @@ myLayoutHook = avoidStruts $ mouseResize myDefaultLayout
   where
     myDefaultLayout =
       renamed [Replace "tall"] (mkToggleAll tall)
+        ||| renamed [Replace "threeCol"] (mkToggleAll threeCol)
+        ||| renamed [Replace "twoVert"] (mkToggleAll twoVertOneHorz)
         ||| renamed [Replace "grid"] (mkToggleAll grid)
         ||| renamed [Replace "monocle"] (mkToggleAll (noBorders monocle))
         ||| renamed [Replace "floats"] floats
@@ -197,6 +207,11 @@ myLayoutHook = avoidStruts $ mouseResize myDefaultLayout
                 (single MIRROR)
                 l
     tall = mkLayout $ ResizableTall 1 (3 / 100) (1 / 2) []
+    threeCol = mkLayout $ ThreeCol 1 (3/100) (1/3)
+    -- Two vertical panes on left, horizontal tabs on right - perfect for ultra-wide
+    twoVertOneHorz = mkLayout $ combineTwo (TwoPane (3/100) (2/3)) 
+                                          (ResizableTall 2 (3/100) (1/2) []) 
+                                          (simpleTabbed)
     floats = mkLayout simplestFloat
     monocle = mkLayout $ limitWindows 20 Full
     grid = mkLayout $ Grid (16/10)
@@ -239,7 +254,7 @@ scratchpads :: [NamedScratchpad]
 scratchpads =
   mkNS
     <$> [ TitleApp "emacs" (customFloating myRightCenter) "emacsclient -s emacs -c -a 'emacs --with-profile doom --title emacs --bg-daemon=emacs'"
-        , TitleApp "smi" (customFloating myTopLeft) (myTerminal ++ " -t smi -e bash -c 'watch -n0.1 nvidia-smi")
+        , TitleApp "smi" (customFloating myTopLeft) (myTerminal ++ " -t smi -e bash -c 'watch -n0.1 nvidia-smi'")
         , TitleApp "btop" (customFloating myMidLeft) (myTerminal ++ " -t btop -e btop")
         , TitleApp "tmux" (customFloating myBtmLeft) (myTerminal ++ " -t tmux -e tmux")
         ]
@@ -338,9 +353,11 @@ myKeyBindings =
   , ("M-S-f", sendMessage ToggleStruts)
   , ("M-C-f", sendMessage (T.Toggle "floats")) -- Toggles my 'floats' layout
   , ("M-C-1", sendMessage $ JumpToLayout "tall")
-  , ("M-C-2", sendMessage $ JumpToLayout "grid")
-  , ("M-C-3", sendMessage $ JumpToLayout "monocle")
-  , ("M-C-4", sendMessage $ JumpToLayout "floats")
+  , ("M-C-2", sendMessage $ JumpToLayout "threeCol")
+  , ("M-C-3", sendMessage $ JumpToLayout "twoVert")      -- 2 vertical + 1 horizontal
+  , ("M-C-4", sendMessage $ JumpToLayout "grid")
+  , ("M-C-5", sendMessage $ JumpToLayout "monocle")
+  , ("M-C-6", sendMessage $ JumpToLayout "floats")
   , -- Increase/decrease windows in the master pane or the stack
     ("M-S-,", sendMessage (IncMasterN 1)) -- Increase number of clients in master pane
   , ("M-S-.", sendMessage (IncMasterN (-1))) -- Decrease number of clients in master pane
@@ -400,18 +417,18 @@ myKeyBindings =
   , ("M-s", dynamicNSPAction "dyn2")
   , ("M-d", dynamicNSPAction "dyn3")
   , -- environment
-    ("M-S-C-x", spawn "autorandr")
-  , ("M-M1-9", spawn "xbacklight -inc 5")
-  , ("M-M1-8", spawn "xbacklight -dec 5")
+    ("M-S-C-x", safeSpawnProg "autorandr")
+  , ("M-M1-9", safeSpawn "xbacklight" ["-inc", "5"])
+  , ("M-M1-8", safeSpawn "xbacklight" ["-dec", "5"])
   , -- Multimedia Keys
-    ("<XF86AudioPlay>", spawn (myTerminal ++ " mocp --play"))
-  , ("<XF86AudioPrev>", spawn (myTerminal ++ " mocp --previous"))
-  , ("<XF86AudioNext>", spawn (myTerminal ++ " mocp --next"))
-  , ("<XF86AudioMute>", spawn "amixer set Master toggle")
-  , ("<XF86AudioLowerVolume>", spawn "amixer set Master 5%- unmute")
-  , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 5%+ unmute")
-  , ("<XF86MonBrightnessUp>", spawn "xbacklight -inc 5")
-  , ("<XF86MonBrightnessDown>", spawn "xbacklight -dec 5")
+    ("<XF86AudioPlay>", safeSpawn "mocp" ["--play"])
+  , ("<XF86AudioPrev>", safeSpawn "mocp" ["--previous"])
+  , ("<XF86AudioNext>", safeSpawn "mocp" ["--next"])
+  , ("<XF86AudioMute>", safeSpawn "amixer" ["set", "Master", "toggle"])
+  , ("<XF86AudioLowerVolume>", safeSpawn "amixer" ["set", "Master", "5%-", "unmute"])
+  , ("<XF86AudioRaiseVolume>", safeSpawn "amixer" ["set", "Master", "5%+", "unmute"])
+  , ("<XF86MonBrightnessUp>", safeSpawn "xbacklight" ["-inc", "5"])
+  , ("<XF86MonBrightnessDown>", safeSpawn "xbacklight" ["-dec", "5"])
   , ("<XF86Favorites>", spawn myScreenLocker)
   -- , ("<F12>", spawn myScreenLocker)
   , ("M-M1-C-S-l", spawn myScreenLocker)
@@ -420,7 +437,7 @@ myKeyBindings =
   , ("<XF86Mail>", spawn myEmail)
   , ("<XF86Calculator>", runOrRaise "qalculate-gtk" (resource =? "qalculate-gtk"))
   , ("<XF86Eject>", spawn "toggleeject")
-  , ("<Print>", spawn "scrotd 0")
+  , ("<Print>", spawn myCapture)
   ]
     -- screen view and shift
     ++ [ ("M-" ++ m ++ k, screenWorkspace sc >>= flip whenJust (windows . f))
