@@ -174,7 +174,11 @@ altMask = mod1Mask -- Setting this for use in xprompts
 
 -- | Count windows in current workspace - cached for performance
 windowCount :: X (Maybe String)
-windowCount = gets $ Just . show . length . W.integrate' . W.stack . W.workspace . W.current . windowset
+windowCount = gets $ \ws -> 
+  let stack = W.stack . W.workspace . W.current . windowset $ ws
+  in case stack of
+    Nothing -> Just "0"
+    Just s  -> Just . show . length . W.integrate' $ s
 
 
 myStartupHook :: X ()
@@ -208,10 +212,10 @@ myLayoutHook = avoidStruts $ mouseResize myDefaultLayout
                 l
     tall = mkLayout $ ResizableTall 1 (3 / 100) (1 / 2) []
     threeCol = mkLayout $ ThreeCol 1 (3/100) (1/3)
-    -- Master pane splits vertically, slave pane splits horizontally - perfect for ultra-wide  
-    twoVertOneHorz = mkLayout $ combineTwo (TwoPane (3/100) (2/3))
-                                          (ResizableTall 2 (3/100) (1/2) [])
-                                          (Mirror $ ResizableTall 1 (3/100) (1/2) [])
+    -- Two vertical panes on left, horizontal tabs on right - perfect for ultra-wide
+    twoVertOneHorz = mkLayout $ combineTwo (TwoPane (3/100) (2/3)) 
+                                          (ResizableTall 2 (3/100) (1/2) []) 
+                                          (simpleTabbed)
     floats = mkLayout simplestFloat
     monocle = mkLayout $ limitWindows 20 Full
     grid = mkLayout $ Grid (16/10)
