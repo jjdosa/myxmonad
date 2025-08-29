@@ -146,14 +146,14 @@ myScreenLocker = "i3lock-fancy-rapid 10 pixel"
 
 
 myEditor :: String
-myEditor = "emacsclient -s doom -c -a 'emacs --with-profile doom --fg-daemon'" -- Sets emacs as editor for tree select
+myEditor = "emacsclient -c -a 'emacs --fg-daemon'" -- Sets emacs as editor for tree select
 -- myEditor = myTerminal ++ " -e vim "    -- Sets vim as editor for tree select
 
-myEditor2 :: String
-myEditor2 = "emacsclient -s snd -c -a 'emacs --with-profile doom --fg-daemon=snd'" -- Sets emacs as editor for tree select
+-- myEditor2 :: String
+-- myEditor2 = "emacsclient -s snd -c -a 'emacs --with-profile doom --fg-daemon=snd'" -- Sets emacs as editor for tree select
 
 myCapture :: String
-myCapture = "CAPTURE_DIR=${CAPTURE_DIR:-~/Captures}; mkdir -p \"$CAPTURE_DIR\"; flameshot gui -p \"$CAPTURE_DIR\""
+myCapture = "CAPTURE_DIR=${CAPTURE_DIR:-~/Lake/Captures}; mkdir -p \"$CAPTURE_DIR\"; flameshot gui -p \"$CAPTURE_DIR\""
 
 
 myEmail :: String
@@ -208,10 +208,10 @@ myLayoutHook = avoidStruts $ mouseResize myDefaultLayout
                 l
     tall = mkLayout $ ResizableTall 1 (3 / 100) (1 / 2) []
     threeCol = mkLayout $ ThreeCol 1 (3/100) (1/3)
-    -- Master pane splits vertically, slave pane splits horizontally - perfect for ultra-wide  
+    -- Left: 2 vertical masters, Right: horizontal slaves - perfect for ultra-wide
     twoVertOneHorz = mkLayout $ combineTwo (TwoPane (3/100) (2/3))
-                                          (ResizableTall 2 (3/100) (1/2) [])
                                           (Mirror $ ResizableTall 1 (3/100) (1/2) [])
+                                          (ResizableTall 2 (3/100) (1/2) [])
     floats = mkLayout simplestFloat
     monocle = mkLayout $ limitWindows 20 Full
     grid = mkLayout $ Grid (16/10)
