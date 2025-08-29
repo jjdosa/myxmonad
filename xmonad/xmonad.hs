@@ -208,10 +208,10 @@ myLayoutHook = avoidStruts $ mouseResize myDefaultLayout
                 l
     tall = mkLayout $ ResizableTall 1 (3 / 100) (1 / 2) []
     threeCol = mkLayout $ ThreeCol 1 (3/100) (1/3)
-    -- Two vertical panes on left, horizontal tabs on right - perfect for ultra-wide
+    -- Two verticals left, horizontal splits right - perfect for ultra-wide  
     twoVertOneHorz = mkLayout $ combineTwo (TwoPane (3/100) (2/3)) 
-                                          (ResizableTall 2 (3/100) (1/2) []) 
-                                          (simpleTabbed)
+                                          (TwoPane (3/100) (1/2))
+                                          (ResizableTall 1 (3/100) (1/2) [])
     floats = mkLayout simplestFloat
     monocle = mkLayout $ limitWindows 20 Full
     grid = mkLayout $ Grid (16/10)
