@@ -27,10 +27,29 @@ let
     ${xmonadBin}/bin/xmonad-${pkgs.system} --restart
   '';
 
+  xmonad-ghc = pkgs.runCommandLocal "xmonad-ghc-compile" {
+    nativeBuildInputs = [
+      (pkgs.haskellPackages.ghcWithPackages (hpkgs: with hpkgs; [
+        xmonad
+        xmonad-contrib
+        containers
+        process
+        directory
+        filepath
+      ]))
+    ];
+  } ''
+    mkdir -p $out/bin
+
+    # Compile using ghc with all packages available
+    ghc --make ${../xmonad/xmonad.hs} -i -threaded -dynamic -o $out/bin/xmonad
+  '';
+
 in
 {
   inherit
     xmobarrc
     xmonadBin
-    xmonad-restart;
+    xmonad-restart
+    xmonad-ghc;
 }
