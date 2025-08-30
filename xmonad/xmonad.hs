@@ -220,19 +220,19 @@ myLayoutHook = avoidStruts $ mouseResize myDefaultLayout
                                           (ResizableTall 2 (3/100) (1/2) [])
     
     -- Ultra-wide layout: 3 master windows vertically, rest horizontally on right
-    ultraWide = mkLayout $ tmsCombineTwo False 3 (3/100) (3/4)
-                                         (ResizableTall 3 (3/100) (1/3) [])
-                                         simpleTabbed
+    ultraWide = mkLayout $ combineTwo (TwoPane (3/100) (3/4))
+                                      (ResizableTall 3 (3/100) (1/3) [])
+                                      (Mirror $ ResizableTall 1 (3/100) (1/2) [])
     
     -- Coding layout: Main editor + vertical stack, bottom horizontal for terminals  
-    codingLayout = mkLayout $ tmsCombineTwo True 1 (3/100) (2/3)
-                                            (ResizableTall 1 (3/100) (1/2) [])
-                                            (ResizableTall 2 (3/100) (1/2) [])
+    codingLayout = mkLayout $ combineTwo (TwoPane (3/100) (2/3))
+                                        (ResizableTall 1 (3/100) (1/2) [])
+                                        (Mirror $ ResizableTall 2 (3/100) (1/2) [])
     
     -- Browser layout: Main browser + vertical sidebars, tabbed overflow
-    browserLayout = mkLayout $ tmsCombineTwo False 1 (3/100) (2/3)
-                                             Full
-                                             simpleTabbed
+    browserLayout = mkLayout $ combineTwo (TwoPane (3/100) (2/3))
+                                          Full
+                                          simpleTabbed
     
     -- Tabbed combo: Left vertical stack, right tabbed
     tabbedCombo = mkLayout $ combineTwo (TwoPane (3/100) (1/2))
