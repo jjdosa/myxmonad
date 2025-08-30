@@ -86,6 +86,7 @@ import XMonad.Layout.ThreeColumns (ThreeCol(..))
 import XMonad.Layout.TwoPane (TwoPane(..))
 import XMonad.Layout.Combo (combineTwo)
 import XMonad.Layout.Tabbed (simpleTabbed)
+import XMonad.Layout.TallMastersCombo (tmsCombineTwo)
 import XMonad.Hooks.UrgencyHook (UrgencyHook(..), withUrgencyHook, NoUrgencyHook(..))
 import XMonad.Util.Loggers (logTitles)
 
@@ -195,6 +196,10 @@ myLayoutHook = avoidStruts $ mouseResize myDefaultLayout
       renamed [Replace "tall"] (mkToggleAll tall)
         ||| renamed [Replace "threeCol"] (mkToggleAll threeCol)
         ||| renamed [Replace "twoVert"] (mkToggleAll twoVertOneHorz)
+        ||| renamed [Replace "ultraWide"] (mkToggleAll ultraWide)
+        ||| renamed [Replace "coding"] (mkToggleAll codingLayout) 
+        ||| renamed [Replace "browser"] (mkToggleAll browserLayout)
+        ||| renamed [Replace "tabbed"] (mkToggleAll tabbedCombo)
         ||| renamed [Replace "grid"] (mkToggleAll grid)
         ||| renamed [Replace "monocle"] (mkToggleAll (noBorders monocle))
         ||| renamed [Replace "floats"] floats
@@ -208,10 +213,32 @@ myLayoutHook = avoidStruts $ mouseResize myDefaultLayout
                 l
     tall = mkLayout $ ResizableTall 1 (3 / 100) (1 / 2) []
     threeCol = mkLayout $ ThreeCol 1 (3/100) (1/3)
+    
     -- Left: 2 vertical masters, Right: horizontal slaves - perfect for ultra-wide
     twoVertOneHorz = mkLayout $ combineTwo (TwoPane (3/100) (2/3))
                                           (Mirror $ ResizableTall 1 (3/100) (1/2) [])
                                           (ResizableTall 2 (3/100) (1/2) [])
+    
+    -- Ultra-wide layout: 3 master windows vertically, rest horizontally on right
+    ultraWide = mkLayout $ tmsCombineTwo False 3 (3/100) (3/4)
+                                         (ResizableTall 3 (3/100) (1/3) [])
+                                         (Mirror $ ResizableTall 1 (3/100) (1/2) [])
+    
+    -- Coding layout: Main editor + vertical stack, bottom horizontal for terminals
+    codingLayout = mkLayout $ tmsCombineTwo True 1 (3/100) (2/3)
+                                            (ResizableTall 1 (3/100) (1/2) [])
+                                            (Mirror $ ResizableTall 1 (3/100) (1/2) [])
+    
+    -- Browser layout: Main browser + vertical sidebars, tabbed overflow
+    browserLayout = mkLayout $ tmsCombineTwo False 1 (3/100) (2/3)
+                                             Full
+                                             simpleTabbed
+    
+    -- Tabbed combo: Left vertical stack, right tabbed
+    tabbedCombo = mkLayout $ combineTwo (TwoPane (3/100) (1/2))
+                                        (ResizableTall 1 (3/100) (1/2) [])
+                                        simpleTabbed
+    
     floats = mkLayout simplestFloat
     monocle = mkLayout $ limitWindows 20 Full
     grid = mkLayout $ Grid (16/10)
@@ -355,9 +382,13 @@ myKeyBindings =
   , ("M-C-1", sendMessage $ JumpToLayout "tall")
   , ("M-C-2", sendMessage $ JumpToLayout "threeCol")
   , ("M-C-3", sendMessage $ JumpToLayout "twoVert")      -- 2 vertical + 1 horizontal
-  , ("M-C-4", sendMessage $ JumpToLayout "grid")
-  , ("M-C-5", sendMessage $ JumpToLayout "monocle")
-  , ("M-C-6", sendMessage $ JumpToLayout "floats")
+  , ("M-C-4", sendMessage $ JumpToLayout "ultraWide")    -- 3 vertical masters + horizontal
+  , ("M-C-5", sendMessage $ JumpToLayout "coding")       -- Coding: top/bottom split
+  , ("M-C-6", sendMessage $ JumpToLayout "browser")      -- Browser: main + tabbed
+  , ("M-C-7", sendMessage $ JumpToLayout "tabbed")       -- Vertical + tabbed combo
+  , ("M-C-8", sendMessage $ JumpToLayout "grid")
+  , ("M-C-9", sendMessage $ JumpToLayout "monocle")
+  , ("M-C-0", sendMessage $ JumpToLayout "floats")
   , -- Increase/decrease windows in the master pane or the stack
     ("M-S-,", sendMessage (IncMasterN 1)) -- Increase number of clients in master pane
   , ("M-S-.", sendMessage (IncMasterN (-1))) -- Decrease number of clients in master pane
